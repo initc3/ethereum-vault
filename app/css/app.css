@@ -1,0 +1,35 @@
+/**
+ * app.css
+ * 
+ * @author Kersing Huang <kh295@cornell.edu>
+ */
+
+/* ensures material icons are inline with text */
+.middle{
+	vertical-align: middle; 
+}
+
+/* styles for messaging in application */
+.message{
+	padding: 5px 10px 5px 10px;
+	border-radius: 5px;
+}
+
+.error{
+	background-color: #ffcdd2;
+}
+
+.success{
+	background-color: #aed581;
+}
+
+.warning{
+	background-color: #dce775;
+}
+
+/* settings view */
+.collapsible-body{
+	padding-top: 10px;
+	padding-bottom: 10px;
+}
+}

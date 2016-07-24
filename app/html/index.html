@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Vault</title>
+    
+    <!-- Materialize CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+    <link rel="stylesheet" type="text/css" href="css/app.min.css" />
+
+    <!-- JQuery -->
+    <script   src="https://code.jquery.com/jquery-1.12.4.min.js"   integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="   crossorigin="anonymous"></script>
+
+    <!-- Angular -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular.min.js"></script>
+    <!--<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.5.8/angular-route.min.js"></script>-->
+
+    <!-- Materialize JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.6/js/materialize.min.js"></script>
+
+    <script type="text/javascript" src="js/app.min.js"></script>
+  </head>
+
+  <body ng-app="VaultApp">
+    
+    <nav>
+      <div class="nav-wrapper container">
+        <a href="#" class="brand-logo">
+          Vault 
+        </a>
+        <!--
+        <ul id="nav-mobile" class="right hide-on-med-and-down">
+          <li><a href="#"> Help</a></li>
+        </ul>
+        -->
+      </div>
+    </nav>
+
+    <br />
+
+    <div ng-controller="AppController" class="container">
+
+      <div class="row">
+
+        <ul class="tabs">
+          <li class="tab col s3">
+            <a class="active" href="#vaults" ng-click="updateVaults()">
+              <i class="material-icons middle">list</i> View
+            </a>
+          </li>
+          <li class="tab col s3"><a href="#create">
+            <i class="material-icons middle">lock</i> Create</a>
+          </li>
+          <li class="tab col s3"><a href="#settings">
+            <i class="material-icons middle">settings</i> Settings</a>
+          </li>
+        </ul>
+
+        <br />
+        <div ng-repeat="m in messages">
+          <div class="col s12">
+            <div class="message z-depth-1" ng-class="m.class">
+              <i class="material-icons middle">{{ m.icon }}</i>
+              {{m.message}}
+              <a href="#" class="right" ng-click="removeError($index)">Dismiss</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div id="vaults" class="col s12" ng-controller="VaultsController">
+          
+          <table class="bordered highlight responsive-table">
+            <thead>
+              <tr>
+                <th>Address</th>
+                <th>Balance</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr ng-repeat="v in vaults" ng-click="selectVault($index)">
+                <td>{{v.contract.address}}</td>
+                <td>{{v.balance}} wei</td>
+              </tr>
+            </tbody>
+          </table>  
+
+          <div ng-if="vaults.length == 0">
+            <p>You do not have any vaults.</p>
+          </div>
+
+          <br />
+
+          <div ng-show="selectedAccountIndex >= 0" >
+            <div class="card blue-grey darken-1">
+              <div class="card-content white-text">
+                <h5>{{ selectedAccountAddress }}</h5>
+                <a class="waves-effect waves-light btn" ng-click="showDepositModal()">Deposit</a>
+                <a class="waves-effect waves-light btn" ng-click="showWithdrawModal()">Withdraw</a>
+             
+                <table class="striped responsive-table">
+                  <thead>
+                    <tr>
+                      <th>Event</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr ng-repeat="t in transactions">
+                      <td>{{v.transactionHash}}</td>
+                      <td></td>
+                    </tr>
+                  </tbody>
+                </table>  
+
+                <div ng-if="transactions.length == 0">
+                  <p>No events were associated this vault.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="create" class="col s12" ng-controller="CreateVaultController">
+          <form name="createVaultForm">
+            <!--
+            <div class="row">
+              <div class="input-field col s12">
+                <input name="nickname" type="text" ng-model="nickname" />
+                <label for="nickname" data-error="wrong" data-success="right">Nickname</label>
+              </div>
+            </div>
+            -->
+            <div class="row">
+              <div class="input-field col s12">
+                <select id="createAccount" ng-model="createAccount" ng-options="a.address for a in accounts track by a.address"></select>
+                <label for="createAccount" data-error="wrong" data-success="right">Account</label>
+              </div>
+            </div>
+            <div class="row">
+              <div class="input-field col s8">
+                <input type="number" name="locktimeInterval" ng-model="locktimeInterval" />
+                <label for="locktimeInterval" data-error="wrong" data-success="right">Locktime Interval</label>
+              </div>
+              <div class="input-field col s4">
+                <select id="timeUnit">
+                  <option value="1">Seconds</option>
+                  <option value="60">Minutes</option>
+                  <option value="3600">Hours</option>
+                </select>
+                <label for="timeUnit">Units</label>
+              </div>
+            </div>
+            <center>
+              <button type="submit" class="center waves-effect waves-light btn-large" ng-click="registerVault()">Create</button>
+            </center>
+          </form>
+        </div>
+        <div id="settings" class="col s12" ng-controller="SettingsController">
+          
+          <ul class="collapsible" data-collapsible="accordion">
+            <li>
+              <div class="collapsible-header active">
+                <i class="material-icons">add_alert</i>Alerts
+              </div>
+              <div class="collapsible-body">
+                <form name="alertsForm">
+                  <div class="row">
+                    <div class="input-field col s10 offset-s1">
+                      <select id="vaultsToWatch" ng-model="vaultsToWatch" ng-options="v.contract.address for v in vaults track by v.contract.address" multiple></select>
+                      <label for="vaultsToWatch" data-error="wrong" data-success="right">Vault</label>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="input-field col s10 offset-s1">
+                      <input id="email" type="email" ng-model="email" />
+                      <label for="email" data-error="wrong" data-success="right">Email</label>
+                    </div>
+                  </div>
+                </form>
+            </li>
+            <li>
+              <div class="collapsible-header">
+                <i class="material-icons">report_problem</i>Feedback
+              </div>
+              <div class="collapsible-body">
+                <form name="feedbackForm">
+                  <div class="row">
+                    <div class="input-field col s10 offset-s1">
+                      <textarea id="feedback" ng-model="feedback" class="materialize-textarea">
+                      </textarea>
+                      <label for="feedback">
+                        Feedback
+                      </label>
+                    </div>
+                  </div>
+                  <center>
+                    <button class="btn" type="submit">Submit</button>
+                  </center>
+                </form>
+              </div>
+            </li>
+          </ul>
+
+          <center>
+            <button type="submit" class="center waves-effect waves-light btn-large" ng-click="save()">Save</button>
+          </center>
+        </div>
+      </div>
+    
+      <div id="depositModal" class="modal" ng-controller="DepositController">
+        <div class="modal-content">
+          <h4>Deposit</h4>
+          <form name="depositForm">
+            <div class="row">
+              <div class="input-field col s12">
+                <select id="depositFromAccount" ng-model="depositFromAccount" ng-options="a.address + ' (' + a.balance + ' wei)' for a in accounts track by a.address"></select>
+                <label for="depositFromAccount" data-error="wrong" data-success="right">Account</label>
+              </div>
+            </div>
+            <div class="row">
+              <div class="input-field col s8">
+                <input type="number" name="depositAmount" id="depositAmount" ng-model="depositAmount" />
+                <label for="depositAmount" data-error="wrong" data-success="right">Amount</label>
+              </div>
+              <div class="input-field col s4">
+                <select id="etherUnits">
+                  <option value="1">Wei</option>
+                  <option value="1000000000000">Szabo</option>
+                  <option value="1000000000000000">Finney</option>
+                  <option value="1000000000000000000">Ether</option>
+                </select>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <a href="#!" class=" modal-action waves-effect waves-green btn-flat" ng-click="deposit()">Deposit</a>
+          <a href="#!" class=" modal-action modal-close waves-effect waves-green btn-flat">Cancel</a>
+        </div>
+      </div>
+
+    </div> <!-- AppController -->
+  </body>
+</html>

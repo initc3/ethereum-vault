@@ -1,0 +1,5 @@
+build/**
+config/chains/development.json
+dist/**
+generated/**
+node_modules/**

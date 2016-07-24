@@ -1,0 +1,45 @@
+{
+  "name": "ethereum-vaults",
+  "version": "0.0.1",
+  "description": "",
+  "main": "Gruntfile.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "contributors": [
+    {
+      "name": "Ittay Eyal",
+      "email": "stanga@gmail.com"
+    },
+    {
+      "name": "Nicholas Samson",
+      "email": "nes77@cornell.edu"
+    },
+    {
+      "name": "Kersing Huang",
+      "email": "kh295@cornell.edu"
+    }
+  ],
+  "license": "MIT",
+  "homepage": "",
+  "devDependencies": {
+    "compression": "^1.4.3",
+    "embark-framework": "^1.1.1",
+    "express": "^4.12.3",
+    "grunt": "^0.4.5",
+    "grunt-cli": "^0.1.13",
+    "grunt-contrib-clean": "^0.6.0",
+    "grunt-contrib-coffee": "^0.13.0",
+    "grunt-contrib-concat": "^1.0.1",
+    "grunt-contrib-copy": "^0.8.0",
+    "grunt-contrib-uglify": "^2.0.0",
+    "grunt-contrib-watch": "^0.6.1",
+    "grunt-ng-annotate": "^2.0.2",
+    "matchdep": "^0.3.0",
+    "mocha": "^2.2.5",
+    "read-yaml": "^1.0.0"
+  },
+  "dependencies": {
+    "ethersim": "^0.5.0"
+  }
+}
