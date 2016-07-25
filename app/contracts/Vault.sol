@@ -26,6 +26,7 @@ contract Vault{
     event InitiateWithdrawal(uint newWithdrawalAmount, address newWithdrawAddress);
     event AbortWithdrawal(uint newWithdrawalAmount, address newWithdrawAddress);
     event Settled(uint newWithdrawalAmount, address newWithdrawAddress);
+    event RegisteredEmail(string email);
     
     /** 
      * Create the contract
@@ -141,6 +142,13 @@ contract Vault{
         // release lock
         lock = false; 
     }   
+    
+    /**
+     * Emits event log when user registered to receive notifications
+     */
+    function registerEmail(string email) onlyOwner{
+        RegisteredEmail(email);
+    }
     
     /**
      * Fires deposit event when ether is deposited
