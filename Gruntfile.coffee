@@ -59,19 +59,38 @@ module.exports = (grunt) ->
         dest: '<%= files.coffee.dest %>'
         ext: '.js'
 
+    ngAnnotate:
+      app:
+        src: ["<%= files.angular.src %>", "<%= files.js.src %>"]
+        dest: "generated/dapp/js/app.annotated.js"
+
     concat:
       app:
-        src: ["<%= files.jquery %>","<%= files.materialize %>", "<%= files.web3 %>", 'generated/tmp/abi.js', 'generated/dapp/js/app.js', "<%= files.coffee.compiled %>"]
+        src: [
+          "<%= files.jquery %>",
+          "<%= files.materialize %>", 
+          "<%= files.web3 %>", 
+          'generated/tmp/abi.js', 
+          "<%= files.angular.src %>"
+          "<%= files.js.src %>", 
+          "<%= files.coffee.compiled %>"
+        ]
         dest: "generated/dapp/js/app.min.js"
+
+      appMin:
+        src: [
+          "<%= files.jquery %>",
+          "<%= files.materialize %>", 
+          "<%= files.web3 %>", 
+          'generated/tmp/abi.js', 
+          '<%= ngAnnotate.app.dest %>', 
+          "<%= files.coffee.compiled %>"
+        ]
+        dest: "generated/dapp/js/app.annotated.js"
 
       css:
         src: "<%= files.css.src %>"
         dest: "generated/dapp/css/app.min.css"
-
-    ngAnnotate:
-      app:
-        src: ["<%= files.angular.src %>", "<%= files.js.src %>"]
-        dest: "generated/dapp/js/app.js"
 
     watch:
       options:
@@ -79,15 +98,15 @@ module.exports = (grunt) ->
 
       html:
         files: ["<%= files.html.src %>"]
-        tasks: ["copy"]
+        tasks: ["concat","copy"]
 
       js:
         files: ["<%= files.js.src %>"]
-        tasks: ["concat"]
+        tasks: ["concat","copy"]
 
       css:
         files: ["<%= files.css.src %>"]
-        tasks: ["concat"]
+        tasks: ["concat","copy"]
 
       coffee:
         files: ["coffee/**/*.coffee"]
@@ -118,9 +137,6 @@ module.exports = (grunt) ->
         flatten: true
         filter: "isFile"
 
-      js:
-        "generated/dapp/js/app.min.js" : "<%= concat.app.dest %>"
-
       html:
         files:
           "generated/dapp/index.html" : "<%= files.html.src %>"
@@ -134,7 +150,7 @@ module.exports = (grunt) ->
 
     uglify:
       dist:
-        src: "<%= concat.app.dest %>" # input from the concat process
+        src: "<%= concat.appMin.dest %>" # input from the concat process
         dest: "dist/dapp/js/app.min.js"
 
     clean:
@@ -151,6 +167,6 @@ module.exports = (grunt) ->
 
   env = grunt.option('env')
 
-  grunt.registerTask "deploy", ["coffee", "deploy_contracts:"+env, "ngAnnotate", "concat", "copy", "server", "watch"]
+  grunt.registerTask "deploy", ["coffee", "deploy_contracts:"+env, "concat", "copy", "server", "watch"]
   grunt.registerTask "build", ["clean", "deploy_contracts:"+env, "coffee", "ngAnnotate", "concat", "uglify", "copy"]
 
