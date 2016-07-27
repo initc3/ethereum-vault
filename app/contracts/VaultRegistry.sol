@@ -1,5 +1,3 @@
-import "Vault.sol";
-
 /**
  * VaultRegistry is a factory that creates vaults.
  * 
@@ -17,27 +15,33 @@ contract VaultRegistry {
     /** 
      * Creates a new Vault contract and returns its address
      * 
-     * @param locktimeInterval - time after initiating a withdraw in which ether can be settled
+     * @param owner - vault owner's address
+     * @param vault - vault address
      * @return new vault contract address
      */
-    function registerVault (uint locktimeInterval) returns (address) {
+    function registerVault (address owner, address vault) {
         // can't sent ether now
         // one owner address per contract
         if (msg.value > 0 
+            || msg.sender != owner
             || vaultContracts[msg.sender] > 0 ) 
             throw;
-            
-        // create a new contract based on the Vault template
-        // set the owner as the msg.sender
-        address newVaultContract = new Vault(msg.sender, locktimeInterval);
-        
+
         // save the mapping
-        vaultContracts[msg.sender] = newVaultContract;
+        vaultContracts[owner] = vault;
         
         // emit an event log
-        VaultRegistered(newVaultContract, msg.sender);
-        
-        return newVaultContract;
+        VaultRegistered(vault, owner);
+
+    }
+
+    /**
+     * Gets owner's vault
+     * @param owner - the owner's address
+     * @return vault addresss
+     */
+    function getVault(address owner) constant returns (address){
+        return vaultContracts[owner];
     }
     
     /**

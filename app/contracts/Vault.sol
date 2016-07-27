@@ -26,7 +26,7 @@ contract Vault{
     event InitiateWithdrawal(uint newWithdrawalAmount, address newWithdrawAddress);
     event AbortWithdrawal(uint newWithdrawalAmount, address newWithdrawAddress);
     event Settled(uint newWithdrawalAmount, address newWithdrawAddress);
-    event RegisteredEmail(string email);
+    event RegisteredEmail(bytes32 eventName, string email);
     
     /** 
      * Create the contract
@@ -36,6 +36,7 @@ contract Vault{
      */
     function Vault(address newVaultOwner, uint newlocktimeInterval) {
         
+        // locktime must be at least 5 min
         if(newlocktimeInterval < 300)
             throw;
 
@@ -47,21 +48,17 @@ contract Vault{
     }
     
     /**
-     * A modifier that ensures only the vault owner can execute function
-     */
-    modifier onlyOwner {
-        if (msg.sender != vaultOwner) 
-            throw;
-    }
-    
-    /**
      * Initiates withdrawal
      * 
      * @param newWithdrawalAmount - amount to withdraw from vault in wei
      * @param newWithdrawAddress - address to transfer ether to from vault
      */
-    function initiateWithdrawal(uint newWithdrawalAmount, address newWithdrawAddress) onlyOwner {
+    function initiateWithdrawal(uint newWithdrawalAmount, address newWithdrawAddress) {
         
+        // can only withdraw if user is vault owner
+        if (msg.sender != vaultOwner) 
+            throw;
+
         // no ether can be sent when initiateWithdrawal is called
         if (msg.value > 0 ) 
             throw;
@@ -91,7 +88,11 @@ contract Vault{
     /**
      * Owner can prevent withdrawal
      */
-    function abort() onlyOwner{
+    function abort() {
+
+        // can only abort if vault owner
+        if (msg.sender != vaultOwner) 
+            throw;
         
         // no ether is sent when calling abort and 
         // abort has not already been called
@@ -145,9 +146,17 @@ contract Vault{
     
     /**
      * Emits event log when user registered to receive notifications
+     *
+     * @param eventName to receive notification for
+     * @param email address to receive notifications at
      */
-    function registerEmail(string email) onlyOwner{
-        RegisteredEmail(email);
+    function registerEmail(bytes32 eventName, string email) {
+        
+        // can only register if user is vault owner
+        if (msg.sender != vaultOwner) 
+            throw;
+
+        RegisteredEmail(eventName,email);
     }
     
     /**
