@@ -1,61 +1,77 @@
-//
-var vaultApp = angular.module('VaultApp',[]);
-
-vaultApp.constant('MIN_LOCKTIME_INTERVAL',5*60);
-
+/**
+ * Defines application controller. Handles messaging and pending transactions.
+ * 
+ * @author Kersing Huang <kh295@cornell.edu>
+ */
 vaultApp.controller('AppController',[
-	'$scope',
-	function($scope){
+    '$scope',
+    '$rootScope',
+    'VAULT_REGISTRY_TX',
+    function($scope,$rootScope,$VAULT_REGISTRY_TX){
 
-		$scope.messages = [];
+        $scope.messages =[];  
+        $scope.pendingTxs = [];      
 
-		$(function(){
-			$('select').material_select();
-			$('ul.tabs').tabs();
-		});
+        $rootScope.$applyAsync(function(scope){
+            $(function(){
+                $('select').material_select();
+                $('ul.tabs').tabs();
+            });
+        });
 
-		$scope.removeError = function(index){
-			$scope.messages.splice(index,1);
-		};
+        if(typeof web3 !== 'undefined') {                       
+            $scope.usingMist = true;
+        } else{
+            $scope.usingMist = false;        
+        }
 
-		// listen to events
-		web3.eth.filter({
-			address: web3.eth.accounts
-		},function(error, result){
-		  	if(!error){
-		    	Materialize.toast(result, 4000);
-			}else{
-				Materialize.toast(error, 4000);
-			}
-		});
+        var f = web3.eth.filter("pending");
+        f.get(function(err,log){
+            angular.forEach(log,function(h){
+                $scope.pendingTxs.push(h);
+            });
+        });
+        f.watch(function(err,h){
+            $scope.pendingTxs.push(h);
+        });
 
-		$scope.$on("AppError",function($event,msg){
-			$scope.messages.push({
-				class: 'error',
-				icon: 'error',
-				message: msg
-			});
-		});
+        $scope.$on("ConfirmedTransaction",function($event,txHash){
+            var i = $scope.pendingTxs.indexOf(txHash);
+            if(i >= 0){
+                $scope.pendingTxs.splice(i,1);
+            }
+        });
 
-		$scope.$on("AppWarning",function($event,msg){
-			$scope.messages.push({
-				class: 'warning',
-				icon: 'warning',
-				message: msg
-			});
-		});
+        $scope.removeError = function(index){
+            $scope.messages.splice(index,1);
+        };
 
-		$scope.$on("Success",function($event,msg){
-			$scope.messages.push({
-				class: 'success',
-				icon: 'done',
-				message: msg
-			});
-		});
+        $scope.$on("AppError",function($event,msg){
+            $scope.messages.push({
+                class: 'red white-text',
+                icon: 'error',
+                message: msg
+            });         
+        });
 
-		$scope.$on("ClearMessages",function($event){
-			$scope.messages = [];
-		});
+        $scope.$on("AppWarning",function($event,msg){
+            $scope.messages.push({
+                class: 'yellow',
+                icon: 'warning',
+                message: msg
+            });         
+        });
 
-	}
+        $scope.$on("Success",function($event,msg){
+            $scope.messages.push({
+                class: 'green',
+                icon: 'done',
+                message: msg
+            });         
+        });
+
+        $scope.$on("ClearMessages",function($event){
+            $scope.messages = [];
+        });     
+    }
 ]);

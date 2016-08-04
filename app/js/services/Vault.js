@@ -1,74 +1,60 @@
 
+/**
+ * Defines service for dealing with Vaults
+ * 
+ * @author Kersing Huang <kh295@cornell.edu>
+ */
 vaultApp.factory('Vault', [
-	'$rootScope',
-	'$http',
-	function($rootScope,$http) {
+    '$rootScope',    
+    'VAULT_REGISTRY_TX',
+    'LOCAL_STORATE_VAULT_TXS_KEY',
+    function($rootScope,$VAULT_REGISTRY_TX,$LOCAL_STORATE_VAULT_TXS_KEY) {
 
-		if(!window.localStorage){
-			$rootScope.$broadcast("AppWarning","Local storage is not supported. Some features of the application may not work properly.");
-		}
+        if(!window.localStorage){        
+            $rootScope.$broadcast("AppWarning","This application requires local storage.");        
+            return;
+        }
 
-		var vaultRegistryContract = web3.eth.contract(VaultRegistry.abi);
-		var vaultContract = web3.eth.contract(Vault.abi);
-		var vaultRegistry = vaultRegistryContract.at(VaultRegistry.address);
+        if(typeof web3 !== 'undefined') {               
+        
+            var vaultContract = web3.eth.contract(VaultAbi);
+            var vaultRegistryContract = web3.eth.contract(VaultRegistryAbi);
+            var vaultRegistryTx = web3.eth.getTransactionReceipt($VAULT_REGISTRY_TX);
+            var vaultRegistry = vaultRegistryContract.at(vaultRegistryTx.contractAddress);        
 
-		function getVaults(addressesOnly){
-			var txt = window.localStorage.getItem("vaults");
-			if(txt){
-				var vaults = JSON.parse(txt);
-				if(angular.isArray(vaults)){
-					if(addressesOnly){
-						return vaults;
-					}else{
-						var result = [];
-						angular.forEach(vaults,function(addr){
-							var v = vaultContract.at(addr);
-							result.push({
-								contract: v,
-								balance: 0 // TODO: web3.eth.getBalance(v.address)
-							});
-						});
-						return result;
-					}
-				}
-			}else{
-				return [];
-			}
-		}
+            return {                                                                      
+                getVaults: function(hashesOnly){                  
 
-		return {
-			createVault: function(address,timelockInterval,cb){
+                    var txt = window.localStorage.getItem($LOCAL_STORATE_VAULT_TXS_KEY);
+                    var vaultTxs = txt ? JSON.parse(txt) : [];
+                    
+                    if(hashesOnly){
+                        return vaultTxs;
+                    }else{
+                        var vaults = [];
+                        angular.forEach(vaultTxs,function(txHash){
+                            // find address from logs
+                            var tx = web3.eth.getTransactionReceipt(txHash);                                
+                            if(tx && tx.logs && tx.logs.length > 0){                    
+                                // confirmed transaction
+                                vaults.push({
+                                    address: tx.logs[0].address,
+                                    transactionHash: txHash
+                                });    
+                            }                       
+                        });
+                        return vaults;
+                    }
 
-				vaultRegistry.registerVault.sendTransaction(timelockInterval,{
-					from: address
-				},function(err,vaultAddress){
-					if(!err){
-						var vaults = getVaults(true);
-						vaults.push(vaultAddress);
-						var data = JSON.stringify(vaults);
-						window.localStorage.setItem("vaults",data);
-					}
-					if(angular.isFunction(cb)){
-						cb.call(null,err,address);
-					}
-				});
+                },            
+                getContract: function(address){
+                    return vaultContract.at(address);
+                }
+            };      
+            
+        }else{
+            return {};
+        } 
 
-			},
-			deposit: function(vaultAddress, fromAccount, amount, cb){
-
-				web3.eth.sendTransaction({
-					from: fromAccount,
-					to: vaultAddress,
-					value: amount
-				},function(err, txHash){	
-					if(angular.isFunction(cb)){
-						cb.call(null, err, txHash);
-					}			
-				});
-
-			},
-			getVaults: getVaults
-		};
-
-	}
+    }
 ]);

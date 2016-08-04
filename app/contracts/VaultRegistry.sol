@@ -12,36 +12,19 @@ contract VaultRegistry {
     
     event VaultRegistered(address vault, address owner);
 
-    /** 
-     * Creates a new Vault contract and returns its address
-     * 
-     * @param owner - vault owner's address
-     * @param vault - vault address
-     * @return new vault contract address
-     */
-    function registerVault (address owner, address vault) {
-        // can't sent ether now
-        // one owner address per contract
-        if (msg.value > 0 
-            || msg.sender != owner
-            || vaultContracts[msg.sender] > 0 ) 
+    function registerVault (address vaultAddress) {
+        
+        // one owner per vault
+        if(vaultContracts[msg.sender] > 0 ) {
             throw;
+        }
 
         // save the mapping
-        vaultContracts[owner] = vault;
+        vaultContracts[msg.sender] = vaultAddress;
         
         // emit an event log
-        VaultRegistered(vault, owner);
+        VaultRegistered(vaultAddress, msg.sender);
 
-    }
-
-    /**
-     * Gets owner's vault
-     * @param owner - the owner's address
-     * @return vault addresss
-     */
-    function getVault(address owner) constant returns (address){
-        return vaultContracts[owner];
     }
     
     /**

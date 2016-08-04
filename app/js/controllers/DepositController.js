@@ -1,38 +1,78 @@
+/**
+ * Defines controller for deposit modal
+ * 
+ * @author Kersing Huang <kh295@cornell.edu>
+ */
 vaultApp.controller('DepositController',[
-	'$scope',	
-	'$timeout',
-	'Vault',
-	'User',
-	function($scope,$timeout,$Vault,$User){
+	'$scope',
+	'$rootScope',
+	'Vault',	
+	function($scope,$rootScope,$Vault){
 
-		$scope.accounts = $User.getAccounts();
+		if(typeof web3 === 'undefined') {   
+			return;
+		}
+
+		$scope.accounts = [];		
 		$scope.vaultAddress = null;
+		$scope.accountBalance = null;
+
+		angular.forEach(web3.eth.accounts,function(a){
+			$scope.accounts.push({
+				address: a
+			});
+		});
 
 		$scope.$on("SelectedVault",function($event,vaultAddress){
 			$scope.vaultAddress = vaultAddress;
+			$scope.$applyAsync(function(scope){
+	            $('select').material_select();
+	        });
+		});
+
+		$scope.$watchCollection("depositFromAccount",function(newAcct,oldAcct){
+			if(newAcct != oldAcct && newAcct && web3.isAddress(newAcct.address)){
+				var b = web3.eth.getBalance(newAcct.address);
+				$scope.accountBalance = b.toFormat();
+			}
 		});
 		
 		$scope.deposit = function(){
 
-			var amount = parseInt($("#etherUnits").val())*$scope.depositAmount;
+			$scope.error = null;
 
 			if($scope.vaultAddress && $scope.vaultAddress.length > 0 
-				&& amount > 0 
+				&& $scope.depositAmount 
 				&& $scope.depositForm.$valid){
 
-				$Vault.deposit(
-					$scope.vaultAddress, 
-					$scope.depositFromAccount.address, 
-					amount, 
-					function(err,txHash){
-						if(err){
-							$rootScope.$emit("AppErr",err.toString());
-						}else{
-							var tx = web3.eth.getTransaction(txHash);
-							$rootScope.$emit("Success","Deposited " + tx.value + " wei into" + tx.to);
-						}
-					}
-				);
+				var amount = new BigNumber($scope.depositAmount).times(parseInt($scope.etherUnits));
+
+				// check amount isn't negative or zero
+				if(amount.comparedTo(0) <= 0){
+					$scope.error = "Deposit amount needs to be greater than zero.";
+					return;
+				}
+
+				// check amount isn't more than account balance
+				var b = web3.eth.getBalance($scope.depositFromAccount.address);
+				if(b.comparedTo(amount) < 0){
+					$scope.error = "Deposit amount cannot exceed account balance.";
+					return;
+				}
+
+				web3.eth.sendTransaction({
+                    from: $scope.depositFromAccount.address,
+                    to: $scope.vaultAddress,
+                    value: amount
+                },function(err, txHash){    
+                    if(err){
+						$scope.$emit("AppErr",err.toString());
+					}else{
+						$scope.$applyAsync(function(){
+							$("#depositModal").closeModal();
+						});
+					}	
+                });				
 
 			}
 

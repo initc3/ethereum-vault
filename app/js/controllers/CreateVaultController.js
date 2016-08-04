@@ -1,44 +1,63 @@
+/**
+ * Defines controller for the vault creation tab
+ * 
+ * @author Kersing Huang <kh295@cornell.edu>
+ */
 vaultApp.controller('CreateVaultController',[
-	'$scope',
-	'Vault',
-	'User',
-	'MIN_LOCKTIME_INTERVAL',
-	function($scope,$Vault,$User,MIN_LOCKTIME_INTERVAL){
+    '$scope',   
+    'Vault',
+    'MIN_LOCKTIME_INTERVAL',
+    'LOCAL_STORATE_VAULT_TXS_KEY',
+    function($scope,$Vault,$MIN_LOCKTIME_INTERVAL,$LOCAL_STORATE_VAULT_TXS_KEY){
 
-		$scope.accounts = $User.getAccounts();
+        if(typeof web3 === 'undefined') {   
+            return;
+        }
 
-		$scope.registerVault = function(){
+        $scope.accounts = [];
 
-			$scope.$emit("ClearMessages");
+        angular.forEach(web3.eth.accounts,function(a){
+            $scope.accounts.push({
+                address: a
+            });
+        });           
 
-			// timelock interval in seconds
-			var timelockInterval = $("#timeUnit").val()*$scope.locktimeInterval;
+        $scope.registerVault = function(){
 
-			if($scope.createVaultForm.$invalid){
-				$scope.$emit("AppError", "Please fix form" );
-				return;
-			}
+            $scope.$emit("ClearMessages");
 
-			if(timelockInterval > MIN_LOCKTIME_INTERVAL){
-				//console.log("registerVault(" + $scope.accountToCreate.address + "," + timelockInterval + ")");
-				
-				$Vault.createVault(
-					$scope.createAccount.address,
-					timelockInterval,
-					function(err,vaultAddress){
-						if(err){
-							$scope.$emit("AppError",err.toString());
-						}else{
-							$scope.$emit("Success","Created vault at " + vaultAddress);
-						}
-					}
-				);
+            // timelock interval in seconds
+            var timelockInterval = parseInt($scope.timeUnit)*$scope.locktimeInterval;
 
-			}else{
-				$scope.$emit("AppError", "Locktime interval (" + timelockInterval + " seconds) must be greater than " + MIN_LOCKTIME_INTERVAL + " seconds" );
-			}
-			
-		};
+            if($scope.createVaultForm.$invalid){
+                $scope.$emit("AppError", "Please fix form" );
+                return;
+            }
 
-	}
+            if(timelockInterval < $MIN_LOCKTIME_INTERVAL){
+                $scope.$emit("AppError", "Expected timelock to be greater than " + $MIN_LOCKTIME_INTERVAL);
+                return;
+            }
+
+            var vaultContract = web3.eth.contract(VaultAbi);        
+            vaultContract.new($scope.createAccount.address,timelockInterval,{
+                from: $scope.createAccount.address,
+                gas: 900000,
+                data: VaultCode
+            },function(err,contract){
+                if(err){
+                    $scope.$emit("AppError",err.toString());
+                }else if(contract && contract.address){
+                    $scope.$emit("Success","Created vault at " + contract.address);
+                }else{
+                    $scope.locktimeInterval = null;
+                    var vaultTxs = $Vault.getVaults(true);
+                    vaultTxs.push(contract.transactionHash);
+                    window.localStorage.setItem($LOCAL_STORATE_VAULT_TXS_KEY,JSON.stringify(vaultTxs));
+                }                    
+            });
+            
+        };
+
+    }
 ]);

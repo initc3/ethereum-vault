@@ -26,7 +26,13 @@ contract Vault{
     event InitiateWithdrawal(uint newWithdrawalAmount, address newWithdrawAddress);
     event AbortWithdrawal(uint newWithdrawalAmount, address newWithdrawAddress);
     event Settled(uint newWithdrawalAmount, address newWithdrawAddress);
-    event RegisteredEmail(bytes32 eventName, string email);
+    
+    modifier onlyOwner() { // Modifier
+        if (msg.sender != vaultOwner) {
+            throw;
+        }
+        _ // return to function
+    }
     
     /** 
      * Create the contract
@@ -37,14 +43,15 @@ contract Vault{
     function Vault(address newVaultOwner, uint newlocktimeInterval) {
         
         // locktime must be at least 5 min
-        if(newlocktimeInterval < 300)
+        if(newlocktimeInterval < 300){
             throw;
+        }
 
         locktimeInterval = newlocktimeInterval;
         vaultOwner = newVaultOwner;
         
         // emit an event log
-        CreatedVault(newVaultOwner,newlocktimeInterval);
+        CreatedVault(msg.sender,newlocktimeInterval);
     }
     
     /**
@@ -53,27 +60,22 @@ contract Vault{
      * @param newWithdrawalAmount - amount to withdraw from vault in wei
      * @param newWithdrawAddress - address to transfer ether to from vault
      */
-    function initiateWithdrawal(uint newWithdrawalAmount, address newWithdrawAddress) {
-        
-        // can only withdraw if user is vault owner
-        if (msg.sender != vaultOwner) 
-            throw;
-
-        // no ether can be sent when initiateWithdrawal is called
-        if (msg.value > 0 ) 
-            throw;
+    function initiateWithdrawal(uint newWithdrawalAmount, address newWithdrawAddress) onlyOwner {
 
         // check amount is not negative or zero
-        if (newWithdrawalAmount <= 0) 
+        if (newWithdrawalAmount <= 0) {
             throw; 
+        }
         
         // check amount is not too big
-        if (newWithdrawalAmount > this.balance) 
-            throw; 
+        if (newWithdrawalAmount > this.balance) {
+            throw;
+        }
         
         // check we're not withdrawing already 
-        if (withdrawalAmount > 0) 
+        if (withdrawalAmount > 0) {
             throw; 
+        }
         
         // Initiate withdrawal 
         withdrawalUnlockTime = now + locktimeInterval; 
@@ -88,17 +90,8 @@ contract Vault{
     /**
      * Owner can prevent withdrawal
      */
-    function abort() {
+    function abort() onlyOwner {
 
-        // can only abort if vault owner
-        if (msg.sender != vaultOwner) 
-            throw;
-        
-        // no ether is sent when calling abort and 
-        // abort has not already been called
-        if (msg.value > 0) 
-            throw;
-    
         if (withdrawalAmount > 0){
             // pending withdrawal 
             withdrawalAmount = 0;
@@ -116,20 +109,22 @@ contract Vault{
         
         // no ether is sent when calling settle 
         // and settle is not already being called
-        if (msg.value > 0 
-            || lock) 
+        if (msg.value > 0 || lock) {
             throw;
+        }
             
         // obtain lock
         lock = true; 
 
         // ether is still frozen time lock hasn't expired
-        if (withdrawalUnlockTime > now) 
+        if (withdrawalUnlockTime > now) {
             throw;
+        }
         
         // withdrawal hasn't been initiated
-        if (withdrawalAmount <= 0) 
+        if (withdrawalAmount <= 0) {
             throw;
+        }
             
         if(withdrawalAddress.send(withdrawalAmount)){
             withdrawalAmount = 0; 
@@ -143,21 +138,6 @@ contract Vault{
         // release lock
         lock = false; 
     }   
-    
-    /**
-     * Emits event log when user registered to receive notifications
-     *
-     * @param eventName to receive notification for
-     * @param email address to receive notifications at
-     */
-    function registerEmail(bytes32 eventName, string email) {
-        
-        // can only register if user is vault owner
-        if (msg.sender != vaultOwner) 
-            throw;
-
-        RegisteredEmail(eventName,email);
-    }
     
     /**
      * Fires deposit event when ether is deposited
