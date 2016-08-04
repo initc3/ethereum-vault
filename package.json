@@ -17,7 +17,7 @@
       "email": "kh295@cornell.edu"
     }
   ],
-  "license": "MIT",
+  "license": "CRAPL",
   "homepage": "",
   "devDependencies": {
     "compression": "^1.4.3",

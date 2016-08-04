@@ -10,7 +10,7 @@ DApp was built using [AngularJS](https://angularjs.org/) and
 in local storage of the Mist browser. Vaults are *not* automatically registered
 in the registry. 
 
-## Installation ##
+## Running Vault for Development ##
 
 Prerequisites: [npm](https://www.npmjs.com/) and [Mist browser](https://github.com/ethereum/mist/releases)
 
@@ -27,3 +27,6 @@ Prerequisites: [npm](https://www.npmjs.com/) and [Mist browser](https://github.c
 5. Run ```grunt dev```.
 6. Open Mist browser and navigate to http://localhost:8000. You can specify the webserver to run on a
 different port in ```config/server.yml```
+
+## License ##
+Code in this repository is licensed under [CRAPL](http://matt.might.net/articles/crapl/).
