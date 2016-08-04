@@ -1,8 +1,0 @@
-development:
-  Vault:
-    args:
-      - 0x43022103c303fdcdc06e08266645dfd2e34b648a
-      - 301
-staging:
-  VaultRegistry:
-    args:

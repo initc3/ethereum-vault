@@ -3,9 +3,6 @@
   "version": "0.0.1",
   "description": "",
   "main": "Gruntfile.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "contributors": [
     {
       "name": "Ittay Eyal",
@@ -24,12 +21,11 @@
   "homepage": "",
   "devDependencies": {
     "compression": "^1.4.3",
-    "embark-framework": "^1.1.1",
+    "ethereumjs-testrpc": "^2.1.0",
     "express": "^4.12.3",
     "grunt": "^0.4.5",
     "grunt-cli": "^0.1.13",
     "grunt-contrib-clean": "^0.6.0",
-    "grunt-contrib-coffee": "^0.13.0",
     "grunt-contrib-concat": "^1.0.1",
     "grunt-contrib-copy": "^0.8.0",
     "grunt-contrib-uglify": "^2.0.0",
@@ -37,12 +33,13 @@
     "grunt-ng-annotate": "^2.0.2",
     "matchdep": "^0.3.0",
     "mocha": "^2.2.5",
-    "read-yaml": "^1.0.0"
+    "read-yaml": "^1.0.0",
+    "solc": "^0.3.5",
+    "web3": "^0.17.0-alpha"
   },
   "dependencies": {
     "angular": "^1.5.8",
     "angular-route": "^1.5.8",
-    "ethersim": "^0.5.0",
     "jquery": "^3.1.0",
     "materialize-css": "^0.97.7"
   }
