@@ -7,9 +7,11 @@ vaultApp.controller('WithdrawController',[
 	'$scope',
 	'$rootScope',	
 	'Vault',	
-	function($scope,$rootScope,$Vault){
+	'USING_MIST',
+	'DEFAULT_GAS',
+	function($scope,$rootScope,$Vault,$USING_MIST,$DEFAULT_GAS){
 
-		if(typeof web3 === 'undefined') {   
+		if(!$USING_MIST) {   
 			return;
 		}
 		
@@ -58,7 +60,7 @@ vaultApp.controller('WithdrawController',[
 				var vault = $Vault.getContract($scope.vaultAddress);
                 vault.initiateWithdrawal(amount,$scope.depositToAccount.address,{
                     from: web3.eth.accounts[0],
-                    gas: 900000,
+                    gas: $DEFAULT_GAS,
                     to: $scope.vaultAddress
                 },function(err,txHash){
                 	if(err){

@@ -7,9 +7,10 @@ vaultApp.controller('DepositController',[
 	'$scope',
 	'$rootScope',
 	'Vault',	
-	function($scope,$rootScope,$Vault){
+	'USING_MIST',
+	function($scope,$rootScope,$Vault,$USING_MIST){
 
-		if(typeof web3 === 'undefined') {   
+		if(!$USING_MIST) {   
 			return;
 		}
 

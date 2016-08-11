@@ -6,9 +6,11 @@
 vaultApp.controller('AlertsController',[
     '$scope',       
     'VAULT_REGISTRY_TX',
-    function($scope,$VAULT_REGISTRY_TX){
+    'USING_MIST',
+    'DEFAULT_GAS',
+    function($scope,$VAULT_REGISTRY_TX,$USING_MIST,$DEFAULT_GAS){
 
-        if(typeof web3 === 'undefined') {   
+        if(!$USING_MIST) {   
             return;
         }
 
@@ -37,7 +39,7 @@ vaultApp.controller('AlertsController',[
 
             vaultRegistry.registerVault($scope.vaultAddress,{  
                 from: web3.eth.accounts[0],
-                gas: 900000
+                gas: $DEFAULT_GAS
             },function(err,txHash){
                 if(err){
                     $scope.$emit("AppError",err.toString());

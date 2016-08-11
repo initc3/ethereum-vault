@@ -8,9 +8,11 @@ vaultApp.controller('CreateVaultController',[
     'Vault',
     'MIN_LOCKTIME_INTERVAL',
     'LOCAL_STORATE_VAULT_TXS_KEY',
-    function($scope,$Vault,$MIN_LOCKTIME_INTERVAL,$LOCAL_STORATE_VAULT_TXS_KEY){
+    'USING_MIST',
+    'DEFAULT_GAS',
+    function($scope,$Vault,$MIN_LOCKTIME_INTERVAL,$LOCAL_STORATE_VAULT_TXS_KEY,$USING_MIST,$DEFAULT_GAS){
 
-        if(typeof web3 === 'undefined') {   
+        if(!$USING_MIST) {   
             return;
         }
 
@@ -42,7 +44,7 @@ vaultApp.controller('CreateVaultController',[
             var vaultContract = web3.eth.contract(VaultAbi);        
             vaultContract.new($scope.createAccount.address,timelockInterval,{
                 from: $scope.createAccount.address,
-                gas: 900000,
+                gas: $DEFAULT_GAS,
                 data: VaultCode
             },function(err,contract){
                 if(err){

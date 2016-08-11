@@ -7,7 +7,14 @@ vaultApp.controller('AppController',[
     '$scope',
     '$rootScope',
     'VAULT_REGISTRY_TX',
-    function($scope,$rootScope,$VAULT_REGISTRY_TX){
+    'USING_MIST',
+    function($scope,$rootScope,$VAULT_REGISTRY_TX,$USING_MIST){
+
+        $scope.usingMist = $USING_MIST;
+
+        if(!$USING_MIST){
+            return;
+        }
 
         $scope.messages =[];  
         $scope.pendingTxs = [];      
@@ -17,13 +24,7 @@ vaultApp.controller('AppController',[
                 $('select').material_select();
                 $('ul.tabs').tabs();
             });
-        });
-
-        if(typeof web3 !== 'undefined') {                       
-            $scope.usingMist = true;
-        } else{
-            $scope.usingMist = false;        
-        }
+        });                                        
 
         var f = web3.eth.filter("pending");
         f.get(function(err,log){
