@@ -20,6 +20,7 @@
   "license": "CRAPL",
   "homepage": "",
   "devDependencies": {
+    "bignumber.js": "^2.4.0",
     "compression": "^1.4.3",
     "ethereumjs-testrpc": "^2.1.0",
     "express": "^4.12.3",

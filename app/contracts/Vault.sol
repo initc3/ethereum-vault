@@ -41,11 +41,6 @@ contract Vault{
      * @param newlocktimeInterval - time ether is locked in vault after a withdrawal is initiated
      */
     function Vault(address newVaultOwner, uint newlocktimeInterval) {
-        
-        // locktime must be at least 5 min
-        if(newlocktimeInterval < 300){
-            throw;
-        }
 
         locktimeInterval = newlocktimeInterval;
         vaultOwner = newVaultOwner;
@@ -127,10 +122,10 @@ contract Vault{
         }
             
         if(withdrawalAddress.send(withdrawalAmount)){
-            withdrawalAmount = 0; 
-            
             // emit an event log
             Settled(withdrawalAmount,withdrawalAddress);
+
+            withdrawalAmount = 0;                         
         }else{
             throw;
         }

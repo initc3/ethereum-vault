@@ -15,18 +15,22 @@ in the registry.
 Prerequisites: [npm](https://www.npmjs.com/) and [Mist browser](https://github.com/ethereum/mist/releases)
 
 1. ```npm install```
-2. Start Ethereum client on a private network. 
+2. Start Ethereum client on a private network.
 
-	```
-	geth --dev --rpc --rpcapi "db,eth,net,web3" --rpcport "8545" --rpccorsdomain "*" --nodiscover --datadir "/tmp/testchain" --mine --minerthreads 1 --etherbase "0"
-	```
+    ```
+    geth --dev --rpc --rpcapi "db,eth,net,web3" --rpcport "8545" --rpccorsdomain "*" --nodiscover --datadir "/tmp/testchain" --mine --minerthreads 1 --etherbase "0"
+    ```
 
-	Note: You must create an account in order to set the etherbase.
+    Note: You must create an account in order to set the etherbase.
 3. Deploy ```app/contracts/VaultRegistry.sol``` to Ethereum blockchain. We recommend using the Ethereum wallet to do this. 
 4. Update ```VAULT_REGISTRY_TX``` in ```app/js/constants.js``` to the transaction hash of the transaction in which the VaultRegistry was created.
 5. Run ```grunt dev```.
 6. Open Mist browser and navigate to http://localhost:8000. You can specify the webserver to run on a
 different port in ```config/server.yml```
+
+## Test ##
+1. ```npm install --global mocha```
+2. ```mocha test```
 
 ## License ##
 Code in this repository is licensed under [CRAPL](http://matt.might.net/articles/crapl/).
